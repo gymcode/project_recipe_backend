@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	utils "github.com/gymcode/project_recipe_backend/utils"
 	"github.com/gymcode/project_recipe_backend/database"
 	"github.com/gymcode/project_recipe_backend/model"
 	"golang.org/x/crypto/bcrypt"
@@ -84,6 +85,14 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
+	//  jwt signing user 
+	token, err := utils.JwtSign()
+
+	if err != nil {
+		panic("there was an issue with the jwt token")
+	}
+
+	log.Printf("jwt token %s", token)
 	// log user in successfully
 	return c.Status(fiber.StatusOK).JSON(
 		model.WrapSuccessResponse{
