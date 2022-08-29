@@ -66,11 +66,10 @@ func Login(c *fiber.Ctx) error {
 	database.DB.Where("email = @email", sql.Named("email", user.Email)).First(&userData)
 
 	if userData.ID == 0 {
-		return c.Status(fiber.StatusNotFound).JSON(model.ApiResponse{
-			Code:    "00",
+		return c.Status(fiber.StatusNotFound).JSON(model.WrapFailureResponse{
+			Code:    "01",
 			Message: "User with email does not exist",
 			Error:   false,
-			Data:    *user,
 		})
 	}
 
@@ -78,17 +77,16 @@ func Login(c *fiber.Ctx) error {
 	results := bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(user.Password))
 
 	if results != nil {
-		return c.Status(fiber.StatusForbidden).JSON(model.ApiResponse{
+		return c.Status(fiber.StatusForbidden).JSON(model.WrapFailureResponse{
 			Code:    "01",
 			Message: "Passwords do not match. Please try again",
 			Error:   false,
-			Data:    *user,
 		})
 	}
 
 	// log user in successfully
 	return c.Status(fiber.StatusOK).JSON(
-		model.ApiResponse{
+		model.WrapSuccessResponse{
 			Code:    "00",
 			Message: "User logged in successfully",
 			Error:   false,
