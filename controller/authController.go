@@ -3,11 +3,12 @@ package controller
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
-	utils "github.com/gymcode/project_recipe_backend/utils"
 	"github.com/gymcode/project_recipe_backend/database"
 	"github.com/gymcode/project_recipe_backend/model"
+	utils "github.com/gymcode/project_recipe_backend/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -85,8 +86,17 @@ func Login(c *fiber.Ctx) error {
 		})
 	}
 
-	//  jwt signing user 
-	token, err := utils.JwtSign()
+	//  jwt signing user
+	token, err := utils.JwtSign(userData.ID)
+
+	// create cookies
+	cookie := new(fiber.Cookie)
+	cookie.Name = "token"
+	cookie.Value = token
+	cookie.Expires = time.Now().Add(time.Hour * 24)
+
+	// set Cookie
+	c.Cookie(cookie)
 
 	if err != nil {
 		panic("there was an issue with the jwt token")
