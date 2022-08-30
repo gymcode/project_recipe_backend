@@ -32,10 +32,14 @@ func Register(c *fiber.Ctx) error {
 
 	// new user
 	userInput := model.User{
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		Password:  string(hashedPassword),
+		FirstName:  user.FirstName,
+		OtherNames: user.OtherNames,
+		Msisdn:     user.Msisdn,
+		Email:      user.Email,
+		Password:   string(hashedPassword),
+		CreatedAt:  time.Now().String(),
+		Country:    user.Country,
+		IsoCode:    user.IsoCode,
 	}
 
 	// insert user
@@ -90,7 +94,7 @@ func Login(c *fiber.Ctx) error {
 	//  jwt signing user
 	token, err := utils.JwtSign(userData.ID)
 
-	// before creating cookie 
+	// before creating cookie
 	// check if there's already a cookie
 	existingCookie := c.Cookies("token")
 	if len(existingCookie) != 0 {
@@ -101,7 +105,6 @@ func Login(c *fiber.Ctx) error {
 				Error:   true,
 			})
 	}
-
 
 	// create cookies
 	cookie := new(fiber.Cookie)
@@ -172,17 +175,17 @@ func User(c *fiber.Ctx) error {
 }
 
 func SignOut(c *fiber.Ctx) error {
-	// clearing the cookie 
+	// clearing the cookie
 	c.Cookie(&fiber.Cookie{
-		Name: "token",
+		Name:     "token",
 		Expires:  time.Now().Add(-(time.Hour * 2)),
-        HTTPOnly: true,
-        SameSite: "lax",
+		HTTPOnly: true,
+		SameSite: "lax",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(model.WrapSuccessResponse{
-		Code: "00",
-        Message: "User logged out successfully",
-		Error: false,
+		Code:    "00",
+		Message: "User logged out successfully",
+		Error:   false,
 	})
 }
