@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gymcode/project_recipe_backend/database"
 	"github.com/gymcode/project_recipe_backend/model"
@@ -94,6 +95,7 @@ func Login(c *fiber.Ctx) error {
 	cookie.Name = "token"
 	cookie.Value = token
 	cookie.Expires = time.Now().Add(time.Hour * 24)
+	cookie.HTTPOnly = true
 
 	// set Cookie
 	c.Cookie(cookie)
@@ -111,4 +113,28 @@ func Login(c *fiber.Ctx) error {
 			Error:   false,
 			Data:    userData,
 		})
+}
+
+func User(c *fiber.Ctx) error {
+	// get the cookie
+	cookie := c.Cookies("token")
+
+	log.Println(cookie)
+	log.Println(utils.Secret)
+	// parsing with claims
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return utils.Secret, nil
+	})
+
+	log.Println(token, err)
+	if err != nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(
+			model.WrapFailureResponse{
+				Code:    "01",
+				Message: err.Error(),
+				Error:   true,
+			})
+	}
+
+	return c.JSON(token)
 }

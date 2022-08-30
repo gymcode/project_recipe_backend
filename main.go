@@ -13,10 +13,12 @@ func main() {
 	database.Connect()
 
 	app := fiber.New()
-	app.Use(cors.New())
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+	}))
 
 	// routes 
 	routes.Routes(app)
-	
+
 	app.Listen(":3000")
 }
