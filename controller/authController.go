@@ -94,7 +94,7 @@ func Login(c *fiber.Ctx) error {
 	cookie := new(fiber.Cookie)
 	cookie.Name = "token"
 	cookie.Value = token
-	cookie.Expires = time.Now().Add(time.Minute)
+	cookie.Expires = time.Now().Add(time.Hour * 24)
 	cookie.HTTPOnly = true
 
 	// set Cookie
@@ -121,16 +121,15 @@ func User(c *fiber.Ctx) error {
 
 	log.Println(cookie)
 	// parsing with claims
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return utils.Secret, nil
 	})
 
-	log.Println(token, err)
 	if token == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
 			model.WrapFailureResponse{
 				Code:    "01",
-				Message: err.Error(),
+				Message: "Unauthorized :: you do not have access to get details",
 				Error:   true,
 			})
 	}
@@ -150,5 +149,11 @@ func User(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.JSON(user)
+	return c.Status(fiber.StatusOK).JSON(
+		model.WrapSuccessResponse{
+			Code:    "00",
+			Message: "request received successfully",
+			Error:   false,
+			Data:    user,
+		})
 }

@@ -1,14 +1,14 @@
 package model
 
 type WrapSuccessResponse struct {
-	Code string
-	Message string
-	Error bool
-	Data User
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Error   bool   `json:"error"`
+	Data    User   `json:"data"`
 }
 
 type WrapFailureResponse struct {
-	Code string
-	Message string
-	Error bool
+	Code    string `json:"code"`
+	Message string `json:"message"`
+	Error   bool   `json:"error"`
 }
