@@ -11,7 +11,7 @@ func JwtSign(id int)(sigedString string, err error){
 
 	// creating the claims 
 	claims := jwt.StandardClaims{
-		ExpiresAt: jwt.NewTime(15000 * 4 * 24),
+		ExpiresAt: jwt.NewTime(1500),
 		Issuer: strconv.Itoa(int(id)),
 	}
 

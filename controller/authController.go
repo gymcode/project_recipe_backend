@@ -94,7 +94,7 @@ func Login(c *fiber.Ctx) error {
 	cookie := new(fiber.Cookie)
 	cookie.Name = "token"
 	cookie.Value = token
-	cookie.Expires = time.Now().Add(time.Hour * 24)
+	cookie.Expires = time.Now().Add(time.Minute)
 	cookie.HTTPOnly = true
 
 	// set Cookie
@@ -120,14 +120,13 @@ func User(c *fiber.Ctx) error {
 	cookie := c.Cookies("token")
 
 	log.Println(cookie)
-	log.Println(utils.Secret)
 	// parsing with claims
 	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return utils.Secret, nil
 	})
 
 	log.Println(token, err)
-	if err != nil {
+	if token == nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(
 			model.WrapFailureResponse{
 				Code:    "01",
@@ -136,5 +135,20 @@ func User(c *fiber.Ctx) error {
 			})
 	}
 
-	return c.JSON(token)
+	// convert it to the standard claim
+	claim := token.Claims.(*jwt.StandardClaims)
+
+	var user model.User
+
+	database.DB.Where("id = @id", sql.Named("id", claim.Issuer)).Find(&user)
+
+	if user.ID == 0 {
+		return c.Status(fiber.StatusNotFound).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: "User with email does not exist",
+			Error:   false,
+		})
+	}
+
+	return c.JSON(user)
 }
