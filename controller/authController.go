@@ -29,12 +29,17 @@ func Register(c *fiber.Ctx) error {
 	//password hashing
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 15)
 	log.Println("hashed password:: ", hashedPassword)
+	log.Println(user.Msisdn)
+
+	// msisdn validation base on countrycode
+	msisdn := utils.CountryValidation(user.Msisdn, user.IsoCode)
+	log.Println(msisdn)
 
 	// new user
 	userInput := model.User{
 		FirstName:  user.FirstName,
 		OtherNames: user.OtherNames,
-		Msisdn:     user.Msisdn,
+		Msisdn:     msisdn,
 		Email:      user.Email,
 		Password:   string(hashedPassword),
 		CreatedAt:  time.Now().String(),
