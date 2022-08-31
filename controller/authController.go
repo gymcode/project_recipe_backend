@@ -35,6 +35,18 @@ func Register(c *fiber.Ctx) error {
 	msisdn := utils.CountryValidation(user.Msisdn, user.IsoCode)
 	log.Println(msisdn)
 
+	// check if the number alredy exists in the database before storing it 
+	var userData model.User
+	database.DB.Where("msisdn = @msisdn", sql.Named("msisdn", msisdn)).Find(&userData)
+
+	if userData.Msisdn == msisdn {
+		return c.Status(fiber.StatusNotFound).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: "phone number already exists. please use a different number",
+			Error:   false,
+		})
+	}
+
 	// new user
 	userInput := model.User{
 		FirstName:  user.FirstName,
