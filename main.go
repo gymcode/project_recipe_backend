@@ -20,5 +20,5 @@ func main() {
 	// routes 
 	routes.Routes(app)
 
-	app.Listen(":3000")
+	app.Listen(":8000")
 }
