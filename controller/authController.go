@@ -19,11 +19,17 @@ func SendMessage(c *fiber.Ctx) error {
 
 func Register(c *fiber.Ctx) error {
 	user := new(model.User)
-	log.Println("user model with the details :: ", user)
 
 	err := c.BodyParser(user)
+	log.Println("user model with the details :: ", user)
+	
 	if err != nil {
-		return err
+		log.Println(err.Error())
+		return c.Status(fiber.StatusInternalServerError).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: err.Error(),
+			Error:   false,
+		})
 	}
 
 	//password hashing
