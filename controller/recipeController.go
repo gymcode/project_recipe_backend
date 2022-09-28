@@ -26,7 +26,7 @@ func AddRecipe(c *fiber.Ctx) error {
 			model.WrapFailureResponse{
 				Code:    "01",
 				Message: "Unauthorized :: you do not have access to get details",
-				Error:   true,
+				Error:   false,
 			})
 	}
 
