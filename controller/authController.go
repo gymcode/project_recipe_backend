@@ -5,6 +5,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/twilio/twilio-go"
+
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gymcode/project_recipe_backend/database"
@@ -22,7 +24,7 @@ func Register(c *fiber.Ctx) error {
 
 	err := c.BodyParser(user)
 	log.Println("user model with the details :: ", user)
-	
+
 	if err != nil {
 		log.Println(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(model.WrapFailureResponse{
@@ -41,7 +43,7 @@ func Register(c *fiber.Ctx) error {
 	msisdn := utils.CountryValidation(user.Msisdn, user.IsoCode)
 	log.Println(msisdn)
 
-	// check if the number alredy exists in the database before storing it 
+	// check if the number alredy exists in the database before storing it
 	var userData model.User
 	database.DB.Where("msisdn = @msisdn", sql.Named("msisdn", msisdn)).Find(&userData)
 
@@ -210,5 +212,15 @@ func SignOut(c *fiber.Ctx) error {
 		Code:    "00",
 		Message: "User logged out successfully",
 		Error:   false,
+	})
+}
+
+func ConfirmOtp(c *fiber.Ctx) error {
+	accountSid := "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	authToken := "f2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+	client := twilio.NewRestClientWithParams(twilio.ClientParams{
+		Username: accountSid,
+		Password: authToken,
 	})
 }
