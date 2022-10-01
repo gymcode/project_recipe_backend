@@ -34,12 +34,9 @@ func Register(c *fiber.Ctx) error {
 
 	//password hashing
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), 15)
-	log.Println("hashed password:: ", hashedPassword)
-	log.Println(user.Msisdn)
 
 	// msisdn validation base on countrycode
 	msisdn := utils.CountryValidation(user.Msisdn, user.IsoCode)
-	log.Println(msisdn)
 
 	// check if the number alredy exists in the database before storing it
 	var userData model.User
@@ -49,7 +46,7 @@ func Register(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusNotFound).JSON(model.WrapFailureResponse{
 			Code:    "01",
 			Message: "phone number already exists. please use a different number",
-			Error:   false,
+			Error:   true,
 		})
 	}
 
@@ -94,7 +91,7 @@ func Register(c *fiber.Ctx) error {
 	}
 
 	// send the otp to the user 
-	
+
 
 	log.Println("user input here :: ", userInput)
 	return c.JSON(fiber.Map{
@@ -102,6 +99,54 @@ func Register(c *fiber.Ctx) error {
 		"message": "You have signed up successfully",
 		"data":    userInput,
 	})
+}
+
+func ResendOtp(c *fiber.Ctx)error {
+	// get the msisdn from the parameter
+	msisdn := c.Params("msisdn")
+	if msisdn == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: "Msisdn must not be empty",
+			Error:   true,
+		})
+	}
+
+	// get the user by the msisdn 
+	var userOtp model.OTP
+
+	dbResponse := database.DB.Delete(&userOtp, "msisdn = ?", msisdn)
+
+	if dbResponse.RowsAffected < 0 {
+		panic("Could not insert into the database")
+	}
+
+	// generate otp and send
+	otp := utils.GenerateOtp(6)
+	log.Println("otp generated for user :: %s", otp)
+
+	hashedOtp, _ := bcrypt.GenerateFromPassword([]byte(otp), 15)
+
+	otpInput := model.OTP{
+		Msisdn:    msisdn,
+		HashedOtp: string(hashedOtp),
+		CreatedAt: time.Now().String(),
+		UpdatedAt: time.Now().String(),
+	}
+
+	otpInputResponse := database.DB.Create(&otpInput)
+
+	// checking if it was inserted
+	if otpInputResponse.RowsAffected < 0 {
+		panic("Could not insert into the database")
+	}
+
+
+	// delete the existing otp for that user in the database 
+	// generate a new otp 
+	// hash the new otp 
+	// store the new otp generated in the otp table 
+	// send the otp to the msisdn
 }
 
 func Login(c *fiber.Ctx) error {
@@ -236,6 +281,6 @@ func SignOut(c *fiber.Ctx) error {
 	})
 }
 
-func ConfirmOtp(c *fiber.Ctx) error {
+// func ConfirmOtp(c *fiber.Ctx) error {
 
-}
+// }
