@@ -5,8 +5,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/twilio/twilio-go"
-
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gymcode/project_recipe_backend/database"
@@ -74,6 +72,29 @@ func Register(c *fiber.Ctx) error {
 	if results.RowsAffected < 0 {
 		panic("Could not insert into the database")
 	}
+
+	// generate otp and send
+	otp := utils.GenerateOtp(6)
+	log.Println("otp generated for user :: %s", otp)
+
+	hashedOtp, _ := bcrypt.GenerateFromPassword([]byte(otp), 15)
+
+	otpInput := model.OTP{
+		Msisdn:    msisdn,
+		HashedOtp: string(hashedOtp),
+		CreatedAt: time.Now().String(),
+		UpdatedAt: time.Now().String(),
+	}
+
+	otpInputResponse := database.DB.Create(&otpInput)
+
+	// checking if it was inserted
+	if otpInputResponse.RowsAffected < 0 {
+		panic("Could not insert into the database")
+	}
+
+	// send the otp to the user 
+	
 
 	log.Println("user input here :: ", userInput)
 	return c.JSON(fiber.Map{
@@ -216,11 +237,5 @@ func SignOut(c *fiber.Ctx) error {
 }
 
 func ConfirmOtp(c *fiber.Ctx) error {
-	accountSid := "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
-	authToken := "f2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-	client := twilio.NewRestClientWithParams(twilio.ClientParams{
-		Username: accountSid,
-		Password: authToken,
-	})
 }

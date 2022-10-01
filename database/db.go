@@ -19,7 +19,9 @@ func Connect() {
 
 	DB = db_connection
 
-	db_connection.AutoMigrate(&model.User{})
+	db_connection.AutoMigrate(
+		&model.User{}, 
+		&model.OTP{})
 	// log.Println(connection)
 
 }	
