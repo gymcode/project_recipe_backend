@@ -72,7 +72,7 @@ func Register(c *fiber.Ctx) error {
 
 	// generate otp and send
 	otp := utils.GenerateOtp(6)
-	log.Println("otp generated for user :: %s", otp)
+	log.Printf("otp generated for user :: %s", otp)
 
 	hashedOtp, _ := bcrypt.GenerateFromPassword([]byte(otp), 15)
 
@@ -123,7 +123,7 @@ func ResendOtp(c *fiber.Ctx)error {
 
 	// generate otp and send
 	otp := utils.GenerateOtp(6)
-	log.Println("otp generated for user :: %s", otp)
+	log.Printf("otp generated for user :: %s", otp)
 
 	hashedOtp, _ := bcrypt.GenerateFromPassword([]byte(otp), 15)
 
@@ -141,11 +141,12 @@ func ResendOtp(c *fiber.Ctx)error {
 		panic("Could not insert into the database")
 	}
 
+	return c.JSON(fiber.Map{
+		"code":    "00",
+		"message": "OTP has been resent sucessfully",
+		"data":   nil,
+	})
 
-	// delete the existing otp for that user in the database 
-	// generate a new otp 
-	// hash the new otp 
-	// store the new otp generated in the otp table 
 	// send the otp to the msisdn
 }
 

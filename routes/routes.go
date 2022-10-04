@@ -19,6 +19,7 @@ func Routes(app *fiber.App) {
 	// app.Post(fmt.Sprintf("%s/confirm-otp", BaseUrl), controller.ConfirmOtp)
 	app.Get(fmt.Sprintf("%s/user", BaseUrl), controller.User)
 	app.Get(fmt.Sprintf("%s/signout", BaseUrl), controller.SignOut)
+	app.Post(fmt.Sprintf("%s/resend/:msisdn",  BaseUrl), controller.ResendOtp)
 
 	/*
 	Routes for Recipe Crud
