@@ -2,11 +2,13 @@ package controller
 
 import (
 	"database/sql"
+	// "fmt"
 	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gymcode/project_recipe_backend/dao"
 	"github.com/gymcode/project_recipe_backend/database"
 	"github.com/gymcode/project_recipe_backend/model"
 	utils "github.com/gymcode/project_recipe_backend/utils"
@@ -21,14 +23,11 @@ func Register(c *fiber.Ctx) error {
 	user := new(model.User)
 
 	err := c.BodyParser(user)
-	log.Println("user model with the details :: ", user)
-
 	if err != nil {
-		log.Println(err.Error())
 		return c.Status(fiber.StatusInternalServerError).JSON(model.WrapFailureResponse{
 			Code:    "01",
 			Message: err.Error(),
-			Error:   false,
+			Error:   true,
 		})
 	}
 
@@ -40,7 +39,7 @@ func Register(c *fiber.Ctx) error {
 
 	// check if the number alredy exists in the database before storing it
 	var userData model.User
-	database.DB.Where("msisdn = @msisdn", sql.Named("msisdn", msisdn)).Find(&userData)
+	dao.GetUserByMsisdn(userData, msisdn)
 
 	if userData.Msisdn == msisdn {
 		return c.Status(fiber.StatusNotFound).JSON(model.WrapFailureResponse{
@@ -50,7 +49,7 @@ func Register(c *fiber.Ctx) error {
 		})
 	}
 
-	// new user
+	// insert user into the database
 	userInput := model.User{
 		FirstName:  user.FirstName,
 		OtherNames: user.OtherNames,
@@ -61,19 +60,11 @@ func Register(c *fiber.Ctx) error {
 		Country:    user.Country,
 		IsoCode:    user.IsoCode,
 	}
+	dao.InsertUser(userInput)
 
-	// insert user
-	results := database.DB.Create(&userInput)
-
-	// checking if it was inserted
-	if results.RowsAffected < 0 {
-		panic("Could not insert into the database")
-	}
-
-	// generate otp and send
+	// generating otp and storing user otp
 	otp := utils.GenerateOtp(6)
 	log.Printf("otp generated for user :: %s", otp)
-
 	hashedOtp, _ := bcrypt.GenerateFromPassword([]byte(otp), 15)
 
 	otpInput := model.OTP{
@@ -82,18 +73,18 @@ func Register(c *fiber.Ctx) error {
 		CreatedAt: time.Now().String(),
 		UpdatedAt: time.Now().String(),
 	}
+	dao.InsertOtp(otpInput)
 
-	otpInputResponse := database.DB.Create(&otpInput)
+	// send the otp to the user
+	// message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
+	// recipient := fmt.Sprintf("+%s", msisdn)
+	// log.Printf(recipient)
+	// response := utils.SendSms(message, recipient)
 
-	// checking if it was inserted
-	if otpInputResponse.RowsAffected < 0 {
-		panic("Could not insert into the database")
-	}
+	// if !response {
+	// 	panic("error occured")
+	// }
 
-	// send the otp to the user 
-
-
-	log.Println("user input here :: ", userInput)
 	return c.JSON(fiber.Map{
 		"code":    "00",
 		"message": "You have signed up successfully",
@@ -101,7 +92,7 @@ func Register(c *fiber.Ctx) error {
 	})
 }
 
-func ResendOtp(c *fiber.Ctx)error {
+func ResendOtp(c *fiber.Ctx) error {
 	// get the msisdn from the parameter
 	msisdn := c.Params("msisdn")
 	if msisdn == "" {
@@ -112,7 +103,7 @@ func ResendOtp(c *fiber.Ctx)error {
 		})
 	}
 
-	// get the user by the msisdn 
+	// get the user by the msisdn
 	var userOtp model.OTP
 
 	dbResponse := database.DB.Delete(&userOtp, "msisdn = ?", msisdn)
@@ -144,7 +135,7 @@ func ResendOtp(c *fiber.Ctx)error {
 	return c.JSON(fiber.Map{
 		"code":    "00",
 		"message": "OTP has been resent sucessfully",
-		"data":   nil,
+		"data":    nil,
 	})
 
 	// send the otp to the msisdn
