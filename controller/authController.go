@@ -2,7 +2,7 @@ package controller
 
 import (
 	"database/sql"
-	// "fmt"
+	"fmt"
 	"log"
 	"time"
 
@@ -76,14 +76,14 @@ func Register(c *fiber.Ctx) error {
 	dao.InsertOtp(otpInput)
 
 	// send the otp to the user
-	// message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
-	// recipient := fmt.Sprintf("+%s", msisdn)
-	// log.Printf(recipient)
-	// response := utils.SendSms(message, recipient)
+	message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
+	recipient := fmt.Sprintf("+%s", msisdn)
+	
+	response := utils.SendSms(message, recipient)
 
-	// if !response {
-	// 	panic("error occured")
-	// }
+	if !response {
+		panic("error occured")
+	}
 
 	return c.JSON(fiber.Map{
 		"code":    "00",

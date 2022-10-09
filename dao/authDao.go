@@ -40,9 +40,9 @@ func GetUserByMsisdn(user model.User, msisdn string){
 // ------------ OTP DAO -----------------
 
 /**
-	method: GetUserByMsisdn
-	desc: gettting a user by the phone number
-	params: user model and the msisdn 
+	method: InsertOtp
+	desc: inserting the otp into the database
+	params: OTP model
 */
 func InsertOtp(otp model.OTP) *gorm.DB{
 	resp := database.DB.Create(&otp)
@@ -56,8 +56,8 @@ func InsertOtp(otp model.OTP) *gorm.DB{
 }
 
 /**
-	method: GetUserByMsisdn
-	desc: gettting a user by the phone number
+	method: DeleteOtp
+	desc: deleting an otp from the database
 	params: user model and the msisdn 
 */
 func DeleteOtp(user model.User, msisdn string) *gorm.DB{
