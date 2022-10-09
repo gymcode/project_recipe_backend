@@ -59,6 +59,7 @@ func Register(c *fiber.Ctx) error {
 		CreatedAt:  time.Now().String(),
 		Country:    user.Country,
 		IsoCode:    user.IsoCode,
+		Activated:  false,
 	}
 	dao.InsertUser(userInput)
 
@@ -78,7 +79,7 @@ func Register(c *fiber.Ctx) error {
 	// send the otp to the user
 	message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
 	recipient := fmt.Sprintf("+%s", msisdn)
-	
+
 	response := utils.SendSms(message, recipient)
 
 	if !response {
@@ -273,6 +274,23 @@ func SignOut(c *fiber.Ctx) error {
 	})
 }
 
-// func ConfirmOtp(c *fiber.Ctx) error {
+func ConfirmOtp(c *fiber.Ctx) error {
+	// req := c.Body()
+	// msisdn := req{"msisdn"}
+	
 
-// }
+
+
+	// // get the user by the msisdn
+	// var userOtp model.OTP
+
+	// // Fixme: Validate the msisdn before passing it to the database for search
+	// dao.GetOtpByMsisdn(userOtp, msisdn)
+
+		return c.JSON(fiber.Map{
+		"code":    "00",
+		"message": "OTP has been resent sucessfully",
+		"data":    nil,
+	})
+
+}

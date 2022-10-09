@@ -35,6 +35,17 @@ func GetUserByMsisdn(user model.User, msisdn string){
 	database.DB.Where("msisdn = @msisdn", sql.Named("msisdn", msisdn)).Find(&user)
 }
 
+/**
+	method: ActivateUserAccount
+	desc: updating the user account by the activated status
+	params: msisdn and the user model
+*/
+
+func ActivateUserAccount(user model.User, msisdn string) *gorm.DB{
+	return database.DB.Model(&user).Where("msisdn = ?", msisdn).Update("activated", true)
+}
+
+
 
 
 // ------------ OTP DAO -----------------
@@ -60,8 +71,15 @@ func InsertOtp(otp model.OTP) *gorm.DB{
 	desc: deleting an otp from the database
 	params: user model and the msisdn 
 */
-func DeleteOtp(user model.User, msisdn string) *gorm.DB{
-	return database.DB.Delete(&user, "msisdn = ?", msisdn)
+func DeleteOtp(otp model.OTP, msisdn string) *gorm.DB{
+	return database.DB.Delete(&otp, "msisdn = ?", msisdn)
 }
 
-
+/**
+	method: InsertOtp
+	desc: inserting the otp into the database
+	params: OTP model
+*/
+func GetOtpByMsisdn(otp model.OTP, msisdn string) *gorm.DB{
+	return database.DB.Select("msisdn = @msisdn", sql.Named("msisdn", msisdn)).Find(&otp)
+}

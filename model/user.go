@@ -10,4 +10,15 @@ type User struct {
 	Country    string `json:"country"`
 	IsoCode    string `json:"isoCode"`
 	CreatedAt  string `json:"createdAt"`
+	Activated  bool   `json:"activated"`
+}
+
+/*
+	Setting default values for variables
+*/
+
+func UserModel() User{
+	user := User{}
+	user.Activated = false
+	return user
 }
