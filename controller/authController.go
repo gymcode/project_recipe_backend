@@ -80,11 +80,8 @@ func Register(c *fiber.Ctx) error {
 	message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
 	recipient := fmt.Sprintf("+%s", msisdn)
 
-	response := utils.SendSms(message, recipient)
+	utils.SendSms(recipient,message)
 
-	if !response {
-		panic("error occured")
-	}
 
 	return c.JSON(fiber.Map{
 		"code":    "00",

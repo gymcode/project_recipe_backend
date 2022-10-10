@@ -1,35 +1,42 @@
 package utils
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
 
+	"github.com/gymcode/project_recipe_backend/model"
 	"github.com/twilio/twilio-go"
 	twilioAPI "github.com/twilio/twilio-go/rest/api/v2010"
 )
 
-func SendSms() {
+func SendSms(recipient string, content string) {
 	url := "https://api.d7networks.com/messages/v1/send"
 	method := "POST"
 
-	payload := strings.NewReader(`{
-	"messages": [
-		{
-			"channel": "sms",
-			"recipients": ["+233268211334","+233268211334"],
-			"content": "Greetings from D7 API",
-			"msg_type": "text",
-			"data_coding": "text"
-		}
-	],
-	"message_globals": {
-		"originator": "Haute Cuisine OTP",
-		"report_url": "https://the_url_to_recieve_delivery_report.com"
+	message_globals := model.GlobalMessages{
+		Originator: "Haute Cuisine OTP",
+		Report_Url: "https://the_url_to_recieve_delivery_report.com",
 	}
-	}`)
+
+	message_object := model.MessagesObject{
+		Channel:     "sms",
+		Recipients:  []string{recipient},
+		Content:     content,
+		Msg_Type:    "text",
+		Data_Coding: "text",
+	}
+
+	SmsObject := model.SmsObject{
+		Messages:    []model.MessagesObject{message_object},
+		Message_Glb: message_globals,
+	}
+	log.Println(SmsObject)
+	data, _ := json.Marshal(SmsObject)
+	payload := strings.NewReader(string(data))
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, payload)
@@ -40,7 +47,7 @@ func SendSms() {
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-	
+
 
 	res, err := client.Do(req)
 	if err != nil {
