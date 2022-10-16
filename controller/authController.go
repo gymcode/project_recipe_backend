@@ -289,18 +289,32 @@ func ConfirmOtp(c *fiber.Ctx) error {
 	// check if the otp has expired 
 	currentDateTime := time.Now()
 	otpExpiryDateTime,_ := time.Parse("2006-01-02", otp.ExpireAt)
-	if otpExpiryDateTime > currentDateTime {
-		
-	},
-	// // get the user by the msisdn
-	// var userOtp model.OTP
+	if otpExpiryDateTime.After(currentDateTime) {
+		return c.Status(fiber.StatusBadRequest).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: "Otp has expired. Please resend and try again",
+			Error:   true,
+		})
+	}
 
-	// // Fixme: Validate the msisdn before passing it to the database for search
-	// dao.GetOtpByMsisdn(userOtp, msisdn)
+	// hash the new otp
+	results := bcrypt.CompareHashAndPassword([]byte(otp.HashedOtp), []byte(req.Code))
+
+	if results != nil {
+		return c.Status(fiber.StatusForbidden).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: "Passwords do not match. Please try again",
+			Error:   false,
+		})
+	}
+
+	var user model.User
+	// get the user 
+	dao.ActivateUserAccount(user, req.Msisdn)
 
 	return c.JSON(fiber.Map{
 		"code":    "00",
-		"message": "OTP has been resent sucessfully",
+		"message": "Otp has been confirmed successfully",
 		"data":    nil,
 	})
 
