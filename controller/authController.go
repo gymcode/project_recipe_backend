@@ -71,6 +71,7 @@ func Register(c *fiber.Ctx) error {
 	otpInput := model.OTP{
 		Msisdn:    msisdn,
 		HashedOtp: string(hashedOtp),
+		ExpireAt: time.Now().Add(5*60000).String(),
 		CreatedAt: time.Now().String(),
 		UpdatedAt: time.Now().String(),
 	}
@@ -80,8 +81,7 @@ func Register(c *fiber.Ctx) error {
 	message := fmt.Sprintf("Hi there, your otp generated is %s. Please do not sharewith anyone.", otp)
 	recipient := fmt.Sprintf("+%s", msisdn)
 
-	utils.SendSms(recipient,message)
-
+	utils.SendSms(recipient, message)
 
 	return c.JSON(fiber.Map{
 		"code":    "00",
@@ -272,19 +272,33 @@ func SignOut(c *fiber.Ctx) error {
 }
 
 func ConfirmOtp(c *fiber.Ctx) error {
-	// req := c.Body()
-	// msisdn := req{"msisdn"}
+	req := new(model.ConfirmOtpModel)
 	
+	err := c.BodyParser(req)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(model.WrapFailureResponse{
+			Code:    "01",
+			Message: err.Error(),
+			Error:   true,
+		})
+	}
 
+	var otp model.OTP
+	dao.GetOtpByMsisdn(otp, req.Msisdn)
 
-
+	// check if the otp has expired 
+	currentDateTime := time.Now()
+	otpExpiryDateTime,_ := time.Parse("2006-01-02", otp.ExpireAt)
+	if otpExpiryDateTime > currentDateTime {
+		
+	},
 	// // get the user by the msisdn
 	// var userOtp model.OTP
 
 	// // Fixme: Validate the msisdn before passing it to the database for search
 	// dao.GetOtpByMsisdn(userOtp, msisdn)
 
-		return c.JSON(fiber.Map{
+	return c.JSON(fiber.Map{
 		"code":    "00",
 		"message": "OTP has been resent sucessfully",
 		"data":    nil,

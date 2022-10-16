@@ -44,10 +44,13 @@ func SendSms(recipient string, content string) {
 	if err != nil {
 		fmt.Println(err)
 		return
-	}
+	} 
+	tokenKey := 
+	token := fmt.Sprintf("Bearer %s", tokenKey)
+	
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
-
+	req.Header.Add("Authorization", token)
 
 	res, err := client.Do(req)
 	if err != nil {

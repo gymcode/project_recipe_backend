@@ -17,3 +17,8 @@ type GlobalMessages struct {
 	Originator string `json:"originator"`
 	Report_Url string `json:"report_url"`
 }
+
+type ConfirmOtpModel struct {
+	Msisdn string `json:"msisdn"`
+	Code   string `json:"code"`
+}
