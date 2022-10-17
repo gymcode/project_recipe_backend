@@ -14,6 +14,12 @@ import (
 )
 
 func SendSms(recipient string, content string) {
+	config, err := LoadConfig(".")
+	
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
 	url := "https://api.d7networks.com/messages/v1/send"
 	method := "POST"
 
@@ -45,7 +51,7 @@ func SendSms(recipient string, content string) {
 		fmt.Println(err)
 		return
 	} 
-	tokenKey := ""
+	tokenKey := config.Sms_Token_Key
 	token := fmt.Sprintf("Bearer %s", tokenKey)
 	
 	req.Header.Add("Content-Type", "application/json")
@@ -68,8 +74,14 @@ func SendSms(recipient string, content string) {
 }
 
 func SendSmsDummy(message string, recipient string) bool {
-	accountSid := ""
-	authToken := ""
+	config, err := LoadConfig(".")
+	
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	accountSid := config.Sms_Account_Sid
+	authToken := config.Sms_Auth_Token
 
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{
 		Username: accountSid,
