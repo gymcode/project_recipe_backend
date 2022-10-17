@@ -9,8 +9,8 @@ import (
 
 var DB *gorm.DB
 
-func Connect() {
-	dsn := "root:H@ppy123@tcp(127.0.0.1:3306)/testDB"
+func Connect(db_config string) {
+	dsn := db_config
 	db_connection, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {

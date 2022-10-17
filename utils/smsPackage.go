@@ -45,7 +45,7 @@ func SendSms(recipient string, content string) {
 		fmt.Println(err)
 		return
 	} 
-	tokenKey := 
+	tokenKey := ""
 	token := fmt.Sprintf("Bearer %s", tokenKey)
 	
 	req.Header.Add("Content-Type", "application/json")
